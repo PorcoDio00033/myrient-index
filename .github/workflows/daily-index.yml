@@ -1,0 +1,109 @@
+name: Daily Myrient Index
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs at 00:00 UTC every day
+  workflow_dispatch: # Allows manual triggering
+
+permissions:
+  contents: write # Required for creating releases
+
+jobs:
+  generate-index:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        format: [json, csv, txt]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6.0.2 # de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Generate Index
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            -w /workspace \
+            --entrypoint sh \
+            rclone/rclone:latest \
+            scripts/generate_index.sh ${{ matrix.format }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v7.0.0 # bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        with:
+          name: myrient_index_${{ matrix.format }}
+          path: scrape/
+
+  create-release:
+    needs: generate-index
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v8.0.1 # 3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          path: scrape
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2.6.1 # 153bb8e04406b158c6c84fc1615b65b24149a1fe
+        with:
+          tag_name: index-${{ steps.date.outputs.date }}
+          name: Myrient Index - ${{ steps.date.outputs.date }}
+          body: "Automated daily index generation for Myrient."
+          files: |
+            scrape/myrient_index.json
+            scrape/myrient_index.csv
+            scrape/myrient_index_tree.txt
+
+  update-database:
+    needs: generate-index
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6.0.2 # de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Setup Python
+        uses: actions/setup-python@v6.2.0 # a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download existing DB
+        run: |
+          gh release download latest-db -p "myrient_index.7z" || echo "No existing DB found."
+          if [ -f "myrient_index.7z" ]; then
+            7z x myrient_index.7z
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v8.0.1 # 3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          path: "${{ steps.date.outputs.date }} scrape"
+          merge-multiple: true
+
+      - name: Run import script
+        run: python import_scrape.py
+
+      - name: Compress Database
+        run: 7z a -t7z -m0=lzma2 -mx=9 myrient_index.7z myrient_index.db
+
+      - name: Update Release
+        uses: softprops/action-gh-release@v2.6.1 # 153bb8e04406b158c6c84fc1615b65b24149a1fe
+        with:
+          tag_name: latest-db
+          name: "Unified Myrient Database"
+          body: "Continuously updated SQLite database of Myrient files."
+          files: |
+            myrient_index.7z
+            new_files.txt
