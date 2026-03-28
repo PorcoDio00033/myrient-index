@@ -19,15 +19,15 @@ mkdir -p scrape
 case "$FORMAT" in
   json)
     echo "Generating JSON Index..."
-    rclone lsjson "myrient:/" --fast-list --checkers 12 --metadata --recursive > scrape/myrient_index.json
+    rclone lsjson "myrient:/" --fast-list --checkers 10 --metadata --recursive > scrape/myrient_index.json
     ;;
   csv)
     echo "Generating CSV Index..."
-    rclone lsf "myrient:/" --fast-list --recursive --checkers 12 --format "tmsp" --separator "," --absolute --time-format max --csv > scrape/myrient_index.csv
+    rclone lsf "myrient:/" --fast-list --recursive --checkers 10 --format "tmsp" --separator "," --absolute --time-format max --csv > scrape/myrient_index.csv
     ;;
   txt)
     echo "Generating TXT Index..."
-    rclone tree "myrient:/" --fast-list --checkers 12 --all --full-path --modtime --quote --size --output scrape/myrient_index_tree.txt
+    rclone tree "myrient:/" --fast-list --checkers 10 --all --full-path --modtime --quote --size --output scrape/myrient_index_tree.txt
     ;;
   *)
     echo "Usage: $0 {json|csv|txt}"
