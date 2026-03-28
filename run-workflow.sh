@@ -70,10 +70,18 @@ echo "Compressing Database..."
 7z a -t7z -m0=lzma2 -mx=9 myrient_index.7z myrient_index.db
 
 echo "Updating latest-db Release..."
-gh release upload latest-db myrient_index.7z "new_files_${DATE}.txt" --clobber || \
-gh release create latest-db myrient_index.7z "new_files_${DATE}.txt" \
+UPLOAD_FILES="myrient_index.7z"
+if [ -s "new_files_${DATE}.txt" ]; then
+    UPLOAD_FILES="$UPLOAD_FILES new_files_${DATE}.txt"
+fi
+
+gh release upload latest-db $UPLOAD_FILES --clobber || \
+gh release create latest-db $UPLOAD_FILES \
     --title "Unified Myrient Database" \
     --notes "Continuously updated SQLite database of Myrient files."
+
+# Ensure latest-db is always marked as the latest release
+gh release edit latest-db --latest
 
 # Cleanup
 echo "Cleaning up temporary files..."

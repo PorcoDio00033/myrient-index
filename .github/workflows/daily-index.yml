@@ -97,7 +97,12 @@ jobs:
         run: python import_scrape.py
 
       - name: Rename new_files.txt for historical tracking
-        run: mv new_files.txt new_files_${{ steps.date.outputs.date }}.txt
+        run: |
+          if [ -s "new_files.txt" ]; then
+            mv new_files.txt new_files_${{ steps.date.outputs.date }}.txt
+          else
+            rm new_files.txt
+          fi
 
       - name: Compress Database
         run: 7z a -t7z -m0=lzma2 -mx=9 myrient_index.7z myrient_index.db
@@ -108,6 +113,8 @@ jobs:
           tag_name: latest-db
           name: "Unified Myrient Database"
           body: "Continuously updated SQLite database of Myrient files."
+          make_latest: true
+          fail_on_unmatched_files: false
           files: |
             myrient_index.7z
             new_files_${{ steps.date.outputs.date }}.txt
