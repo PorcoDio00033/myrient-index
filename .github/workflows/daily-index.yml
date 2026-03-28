@@ -44,19 +44,20 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v8.0.1 # 3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
-          path: scrape
+          path: "${{ steps.date.outputs.date }} scrape"
           merge-multiple: true
+
+      - name: Compress Artifacts
+        run: 7z a -t7z -m0=lzma2 -mx=9 "${{ steps.date.outputs.date }} scrape.7z" "${{ steps.date.outputs.date }} scrape"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2.6.1 # 153bb8e04406b158c6c84fc1615b65b24149a1fe
         with:
           tag_name: index-${{ steps.date.outputs.date }}
           name: Myrient Index - ${{ steps.date.outputs.date }}
-          body: "Automated daily index generation for Myrient."
+          body: "Automated index generation for Myrient."
           files: |
-            scrape/myrient_index.json
-            scrape/myrient_index.csv
-            scrape/myrient_index_tree.txt
+            ${{ steps.date.outputs.date }} scrape.7z
 
   update-database:
     needs: generate-index
@@ -95,6 +96,9 @@ jobs:
       - name: Run import script
         run: python import_scrape.py
 
+      - name: Rename new_files.txt for historical tracking
+        run: mv new_files.txt new_files_${{ steps.date.outputs.date }}.txt
+
       - name: Compress Database
         run: 7z a -t7z -m0=lzma2 -mx=9 myrient_index.7z myrient_index.db
 
@@ -106,4 +110,4 @@ jobs:
           body: "Continuously updated SQLite database of Myrient files."
           files: |
             myrient_index.7z
-            new_files.txt
+            new_files_${{ steps.date.outputs.date }}.txt

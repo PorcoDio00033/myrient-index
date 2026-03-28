@@ -98,6 +98,9 @@ def process_csv(session, file_path, scrape_date, is_legacy):
                     parts = line.split(',', 3)
                     if len(parts) == 4:
                         mod_time_str, mime_type, size_str, path = parts
+                        # Strip quotes left over from legacy CSV format (exported without --csv rclone flag)
+                        if path.startswith('"') and path.endswith('"'):
+                            path = path[1:-1]
                         try:
                             size = int(size_str)
                             if size == -1:
@@ -266,13 +269,13 @@ def main():
     
     print(f"Found {len(folders)} scrape folders: {folders}")
     
-    latest_scrape_date = None
+    scrape_dates = []
     
     with Session(engine) as session:
         for folder in folders:
             print(f"\nProcessing folder: {folder}")
             scrape_date = extract_date_from_folder(folder)
-            latest_scrape_date = scrape_date
+            scrape_dates.append(scrape_date)
             
             csv_path = os.path.join(folder, 'myrient_index.csv')
             if os.path.exists(csv_path):
@@ -295,14 +298,17 @@ def main():
 
     print("\nDatabase import complete.")
     
-    if latest_scrape_date:
-        print(f"Exporting new files for date: {latest_scrape_date.strftime('%Y-%m-%d')}")
+    if scrape_dates:
+        total_new_files = 0
         with Session(engine) as session:
-            new_files = session.exec(select(FileRecord.path).where(FileRecord.first_seen == latest_scrape_date)).all()
             with open('new_files.txt', 'w', encoding='utf-8') as f:
-                for path in new_files:
-                    f.write(f"{path}\n")
-        print(f"Exported {len(new_files)} new files to new_files.txt")
+                for date in set(scrape_dates):
+                    print(f"Exporting new files for date: {date.strftime('%Y-%m-%d')}")
+                    new_files = session.exec(select(FileRecord.path).where(FileRecord.first_seen == date)).all()
+                    for path in new_files:
+                        f.write(f"{path}\n")
+                    total_new_files += len(new_files)
+        print(f"Exported {total_new_files} new files to new_files.txt")
     else:
         # Ensure the file exists so the GitHub Action doesn't fail
         with open('new_files.txt', 'w', encoding='utf-8') as f:

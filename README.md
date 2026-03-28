@@ -15,8 +15,9 @@ A Python utility designed to parse file index data (CSV, JSON, TXT) from the Myr
 
 For the fastest and most efficient experience, it is **highly recommended** to use the pre-generated SQLite database. This method avoids the need for manual scraping and is a lot faster than parsing text-based index files.
 
-1.  **Download the Database:** Go to the [**Releases**](https://github.com/your-username/your-repo/releases) page and download the `myrient_index.7z` file from the `latest-db` release.
+1.  **Download the Database:** Go to the [**Releases**](https://github.com/PorcoDio00033/myrient-index/releases/tag/latest-db) page and download the `myrient_index.7z` file from the `latest-db` release.
 2.  **Extract the Database:** Unzip the `myrient_index.db` file.
+3.  **Install Deps**: `pip install -r requirements.txt`
 3.  **Run the Script:** Use the `--db-path` argument to point to the database file.
 
 ```bash
@@ -80,7 +81,9 @@ url = https://myrient.erista.me
 
 ### 2. Creating Indexes (Scraping)
 
-> **Note:** Using the pre-generated **SQLite database is strongly recommended** over manual scraping. Different scrape runs may contain slightly different files. This is due to the HTTP server changing or connection issues during the scrape. If you prefer not to scrape the server yourself, you can download pre-generated scrape files from the **Releases** section of this repository.
+> **Note:** Using the pre-generated **[SQLite database](https://github.com/PorcoDio00033/myrient-index/releases/tag/latest-db) is strongly recommended** over manual scraping.
+
+Different scrape runs may contain slightly different files. This is due to the HTTP server changing or connection issues during the scrape. If you prefer not to scrape the server yourself, you can download pre-generated scrape files from the [**Releases**](https://github.com/PorcoDio00033/myrient-index/releases) section of this repository.
 
 **JSON Format:**
 ```bash
