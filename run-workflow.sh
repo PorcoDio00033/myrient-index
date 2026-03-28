@@ -13,9 +13,6 @@ if [ -z "$GITHUB_REPO" ]; then
     exit 1
 fi
 
-# Authenticate with GitHub
-echo "$GITHUB_TOKEN" | gh auth login --with-token
-
 # Set default repo for gh commands
 export GH_REPO="$GITHUB_REPO"
 
