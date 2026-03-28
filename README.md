@@ -118,3 +118,40 @@ rclone copy "myrient:" "remote:path/myrient-bkp" \
   --no-traverse
 ```
 *(Note: Adjust the destination `remote:path/myrient-bkp` to your preferred local or remote storage path.)*
+
+## Self-Hosting the Indexer (Docker)
+
+If you want to run the automated index generation and database update process yourself (replicating the GitHub Actions workflow), you can use the provided Docker setup.
+
+### Prerequisites
+- Docker and Docker Compose
+- A GitHub Personal Access Token (PAT) with `repo` permissions (to create releases and upload assets).
+
+### Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/PorcoDio00033/myrient-index.git
+cd myrient-index
+```
+
+2. Configure your environment variables in `docker-compose.yml` or create a `.env` file:
+```env
+GITHUB_TOKEN=your_github_personal_access_token
+GITHUB_REPO=yourusername/myrient-index
+CRON_SCHEDULE="0 1 * * *" # Runs daily at 01:00 by default
+```
+
+3. Start the container:
+```bash
+docker compose up -d
+```
+
+The container will run in the background and execute the workflow according to the `CRON_SCHEDULE`. It will generate the indexes, compress them, update the SQLite database, and upload the results to your GitHub repository's releases.
+
+### Running Manually
+
+If you want to trigger a run immediately without waiting for the cron schedule, you can execute:
+```bash
+docker compose run --rm myrient-indexer run
+```

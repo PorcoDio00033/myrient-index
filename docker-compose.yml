@@ -1,0 +1,14 @@
+services:
+  myrient-indexer:
+    build: .
+    container_name: myrient-indexer
+    restart: unless-stopped
+    environment:
+      - CRON_SCHEDULE=0 1 * * *
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_REPO=${GITHUB_REPO} # e.g., yourusername/myrient-file-tree
+    volumes:
+      - myrient-data:/app/data
+
+volumes:
+  myrient-data:
