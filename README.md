@@ -155,3 +155,23 @@ If you want to trigger a run immediately without waiting for the cron schedule, 
 ```bash
 docker compose run --rm myrient-indexer run
 ```
+
+## Database Schema
+
+The following diagram illustrates the structure of the `files` table in the SQLite database.
+
+```mermaid
+erDiagram
+    files {
+        int id PK
+        string path "UNIQUE, INDEX"
+        string name
+        bool is_dir
+        string mime_type
+        int size
+        datetime mod_time
+        datetime first_seen
+        datetime last_seen "INDEX"
+        string source_file
+    }
+```
