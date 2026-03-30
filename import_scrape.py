@@ -1,5 +1,6 @@
 import os
 import csv
+import sys
 import json
 import re
 import time
@@ -12,6 +13,8 @@ from tqdm import tqdm
 
 DB_NAME = 'sqlite:///myrient_index.db'
 BATCH_SIZE = 3000
+
+csv.field_size_limit(sys.maxsize)
 
 class FileRecord(SQLModel, table=True):
     __tablename__ = "files"

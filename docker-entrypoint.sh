@@ -13,7 +13,6 @@ echo "Setting up cron schedule: $CRON_SCHEDULE"
 env > /etc/environment
 echo "$CRON_SCHEDULE root . /etc/environment; /app/run-workflow.sh >> /proc/1/fd/1 2>&1" > /etc/cron.d/myrient-cron
 chmod 0644 /etc/cron.d/myrient-cron
-crontab /etc/cron.d/myrient-cron
 
 # Start cron in foreground
 echo "Starting cron daemon..."
