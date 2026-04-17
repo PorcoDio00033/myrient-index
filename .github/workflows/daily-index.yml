@@ -51,7 +51,7 @@ jobs:
         run: 7z a -t7z -m0=lzma2 -mx=9 "${{ steps.date.outputs.date }} scrape.7z" "${{ steps.date.outputs.date }} scrape"
 
       - name: Create Release
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1bb8e04406b158c6c84fc1615b65b24149a1fe
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2bb8e04406b158c6c84fc1615b65b24149a1fe
         with:
           tag_name: index-${{ steps.date.outputs.date }}
           name: Myrient Index - ${{ steps.date.outputs.date }}
@@ -108,7 +108,7 @@ jobs:
         run: 7z a -t7z -m0=lzma2 -mx=9 myrient_index.7z myrient_index.db
 
       - name: Update Release
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1bb8e04406b158c6c84fc1615b65b24149a1fe
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2bb8e04406b158c6c84fc1615b65b24149a1fe
         with:
           tag_name: latest-db
           name: "Unified Myrient Database"
